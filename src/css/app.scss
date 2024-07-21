@@ -1,0 +1,12 @@
+.q-drawer {
+  .q-item {
+    opacity: 0.6;
+    &.q-router-link--exact-active {
+      opacity: 1;
+    }
+  }
+}
+
+.q-fab--form-rounded {
+  border-radius: 0 !important;
+}
