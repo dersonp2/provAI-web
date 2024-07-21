@@ -105,10 +105,13 @@
 
 <script setup lang="ts">
 import { ref, defineProps, defineEmits, watch } from 'vue';
-import { useQuasar } from 'quasar'
+import { useQuasar, QSpinnerGrid } from 'quasar'
 import { Document, Packer, Paragraph, TextRun, Footer, SectionType, HeadingLevel } from 'docx';
 import { saveAs } from 'file-saver';
 import { provaGerada } from '../../model/constantes';
+import { gerarProva as gerarProvaService } from '../../services/apiService';
+
+
 const $q = useQuasar()
 const props = defineProps({
     modelValue: {
@@ -120,11 +123,10 @@ const props = defineProps({
         required: true
     }
 });
-let provaGeradaIA = ref();
+let provaGeradaIA = ref(null);
 watch(() => props.modelValue, (newValue) => {
     if (newValue) {
-        alert('modal aberto');
-        provaGeradaIA.value = provaGerada;
+        gerarProva
     }
 });
 const emit = defineEmits(['update:modelValue']);
@@ -138,6 +140,17 @@ function closeModal() {
 function updateModelValue(value: boolean) {
     emit('update:modelValue', value);
 }
+const gerarProva = async () => {
+    try {
+        showLoading()
+        provaGeradaIA.value = await gerarProvaService(props.prova);
+        console.log(provaGeradaIA.value);
+    } catch (error) {
+        console.error('Erro ao gerar prova:', error);
+    } finally {
+        stopDownload()
+    }
+};
 
 const isEditModalOpen = ref(false);
 const editedQuestao = ref('');
@@ -292,5 +305,19 @@ function notificarErroDownload() {
         progress: true,
         timeout: 3000,
     });
+}
+
+function showLoading() {
+    console.log('Mostrar o loagind')
+    $q.loading.show({
+        spinner: QSpinnerGrid,
+        message: 'Gerando as questões. Aguarde...',
+        boxClass: 'bg-grey-2 text-grey-9',
+        spinnerColor: 'primary'
+    })
+}
+
+function stopDownload() {
+    $q.loading.hide()
 }
 </script>
